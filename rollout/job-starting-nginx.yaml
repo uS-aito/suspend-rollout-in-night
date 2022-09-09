@@ -1,0 +1,20 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: nginx-starter
+spec:
+  schedule: 00 12 * * *
+  startingDeadlineSeconds: 300
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: nginx-controller
+          containers:
+            - name: kubectl
+              image: bitnami/kubectl:1.24
+              command:
+                - /bin/sh
+                - -c
+                - kubectl scale rollout/php-apache --replicas=3
+          restartPolicy: OnFailure

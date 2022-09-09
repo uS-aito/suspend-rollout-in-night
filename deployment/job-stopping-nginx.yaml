@@ -1,0 +1,60 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: nginx-stopper
+spec:
+  schedule: 10 11 * * *
+  startingDeadlineSeconds: 300
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: nginx-controller
+          containers:
+            - name: kubectl
+              image: bitnami/kubectl:1.24
+              command:
+                - /bin/sh
+                - -c
+                - kubectl scale deployment.v1.apps/php-apache --replicas=0
+          restartPolicy: OnFailure
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: nginx-controller
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: nginx-controller
+rules:
+  - apiGroups:
+      - apps
+    resources:
+      - deployments
+    resourceNames:
+      - php-apache
+    verbs:
+      - get
+  - apiGroups:
+      - apps
+    resources:
+      - deployments/scale
+    resourceNames:
+      - php-apache
+    verbs:
+      - get
+      - patch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: nginx-controller
+subjects:
+  - kind: ServiceAccount
+    name: nginx-controller
+roleRef:
+  kind: Role
+  name: nginx-controller
+  apiGroup: rbac.authorization.k8s.io

@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: kubectl
+  name: kubectl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kubectl
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: kubectl
+    spec:
+      serviceAccountName: nginx-controller
+      containers:
+      - image: bitnami/kubectl:latest
+        name: kubectl
+        resources: {}
+        command:
+          - sleep
+          - "3600"
+status: {}
